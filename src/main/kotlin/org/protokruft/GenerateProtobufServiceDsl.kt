@@ -17,13 +17,20 @@ object GenerateProtobufServiceDsl {
             services: TargetServiceClasses,
             outputFilename: String,
             serviceDslSuffix: String = "",
+            markerInterface: String = "",
             nameFn: (ClassName) -> String = { it.toSimpleNames().replace("Grpc", serviceDslSuffix) }
     ): List<FileSpec> {
         fun Builder.generateFunctionFor(service: GrpcService): Builder {
             val serviceName = nameFn(service.className).removeSuffix(serviceDslSuffix)
             return apply {
                 val interfaceName = ClassName.bestGuess(nameFn(service.className))
+
                 addType(TypeSpec.interfaceBuilder(interfaceName).apply {
+
+                    if ( ! markerInterface.isBlank() ) {
+                        addSuperinterface(ClassName.bestGuess(markerInterface))
+                    }
+
                     service.methods.forEach {
                         addFunction(
                                 FunSpec.builder(it.name).apply {
@@ -35,8 +42,6 @@ object GenerateProtobufServiceDsl {
                                 }.build()
                         )
                     }
-
-
 
                     addType(TypeSpec.objectBuilder("Grpc")
                             .addType(

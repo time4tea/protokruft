@@ -8,5 +8,13 @@ import java.io.StringWriter
 fun Any.check(i: Int, list: List<FileSpec>, root: String) {
     val w = StringWriter()
     list[i - 1].writeTo(w)
-    assertThat(w.toString(), equalTo(javaClass.getResourceAsStream("/$root$i.ktt").reader().readText()))
+    assertThat(w.toString(), equalTo(contentOfResource(javaClass, "/$root$i.ktt")))
+}
+
+private fun contentOfResource(owner: Class<*>, r: String): String {
+    return owner.getResourceAsStream(r)?.let { stream ->
+        stream.reader().use {
+            it.readText()
+        }
+    } ?: throw IllegalArgumentException("Unable to locate $r in relation to ${owner.name}")
 }

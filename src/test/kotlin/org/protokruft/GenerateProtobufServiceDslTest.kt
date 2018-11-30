@@ -31,6 +31,22 @@ class GenerateProtobufServiceDslTest {
         check(2, generated, "expectedService")
         check(3, generated, "expectedService")
     }
+
+
+    @Test
+    fun `generates expected output for a marker interface`() {
+        val generated = generate({
+            listOf(
+                    GrpcService(asClassName<CarServiceGrpc>(), listOf(GrpcMethod("getEngine", listOf(asClassName<Car>()), asClassName<Engine>())))
+            )
+        },
+                outputFilename = "name",
+                serviceDslSuffix = "",
+                markerInterface = "com.somecompany.yourcode.GrpcServiceMarker"
+        )
+        assertThat(generated.size, equalTo(1))
+        check(1, generated, "expectedCarServiceWithMarkerInterface")
+    }
 }
 
 inline fun <reified T> asClassName(): ClassName = T::class.asClassName()
